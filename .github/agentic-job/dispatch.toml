@@ -1,6 +1,6 @@
 # Bounds for the shipped dispatch caller. Copy and replace the exact repo.
 hosts = ["github.com"]
-repos = ["cgwalters-forge/agentic-job"]
+repos = ["ckyrouac/agentic-job"]
 bases = ["main"]
 # Room for a triage run's closes, its comment and one noop or missing_*;
 # every other profile asks for 3 or fewer.

@@ -4,7 +4,7 @@
 # required check has it, so no conclusion the agent may choose can
 # satisfy one.
 hosts = ["github.com"]
-repos = ["cgwalters-forge/agentic-job"]
+repos = ["ckyrouac/agentic-job"]
 bases = ["**"]
 max_outputs = 1
 max_patch_bytes = 1048576

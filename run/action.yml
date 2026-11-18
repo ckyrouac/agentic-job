@@ -16,7 +16,7 @@ inputs:
   runner-home:
     description: >-
       The agent's home (`agentic-job run --runner-home`), required: after
-      cgwalters-forge/actions/secure-host, in a job that holds no secret, no write token and no
+      ckyrouac/actions/secure-host, in a job that holds no secret, no write token and no
       `id-token`
     default: ""
   runner-gate:

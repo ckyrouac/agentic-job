@@ -5,15 +5,15 @@
 #
 # This repository is the reusable workflow and secure-host's source, and
 # its own CI. Its files call them by local path, to test this revision,
-# where a caller names cgwalters-forge/agentic-job/...@COMMIT; or are the
+# where a caller names ckyrouac/agentic-job/...@COMMIT; or are the
 # reusable workflow's own jobs; or build, release and test the binaries.
 [identities]
-reusable_workflows = ["cgwalters-forge/agentic-job/.github/workflows/agentic-job.yml"]
-agent_actions = ["cgwalters-forge/agentic-job/prepare", "cgwalters-forge/agentic-job/run"]
+reusable_workflows = ["ckyrouac/agentic-job/.github/workflows/agentic-job.yml"]
+agent_actions = ["ckyrouac/agentic-job/prepare", "ckyrouac/agentic-job/run"]
 
 [identities.secure_host]
-"cgwalters-forge/agentic-job/secure-host" = "check"
-"cgwalters-forge/actions/secure-host" = "write-policy"
+"ckyrouac/agentic-job/secure-host" = "check"
+"ckyrouac/actions/secure-host" = "write-policy"
 
 [exempt]
 "feed.yml" = "Opt-in maintenance on trusted default-branch code only; downloads domain data without executing it, with a dedicated publishing token restricted to the final step."

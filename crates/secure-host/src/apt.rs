@@ -6,7 +6,7 @@
 //! fallback alone did not prevent it, so that endpoint is replaced rather
 //! than reordered (which mirror+file would pick at random); suites,
 //! components, signing and the other mirrors are left as they are
-//! (cgwalters-forge/actions's secure-host/docs/setup.md). A host without
+//! (ckyrouac/actions's secure-host/docs/setup.md). A host without
 //! `/etc/apt`, a dnf one, is left
 //! alone.
 

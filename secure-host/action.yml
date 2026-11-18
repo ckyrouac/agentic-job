@@ -1,4 +1,4 @@
-# Forwards to cgwalters-forge/actions/secure-host, which runs the
+# Forwards to ckyrouac/actions/secure-host, which runs the
 # attested, digest-pinned secure-host image (tracker#674). A caller that
 # names this path at a commit before the forward keeps the old action;
 # docs/secure-host.md says what changes at a later one.
@@ -12,7 +12,7 @@
 # into a script.
 name: Secure the CI host
 description: >-
-  Forwards to cgwalters-forge/actions/secure-host, which runs the digest-pinned secure-host image:
+  Forwards to ckyrouac/actions/secure-host, which runs the digest-pinned secure-host image:
   no later step of the job has root or reaches the cloud metadata service, and a world-writable
   file can be changed only by its owner
 
@@ -84,7 +84,7 @@ runs:
           if [ -n "${!name}" ]; then name=${name,,}; set+=("${name//_/-}"); fi
         done
         if [ "${#set[@]}" != 0 ]; then
-          echo "::error::secure-host now forwards to cgwalters-forge/actions/secure-host, which takes only config, check and image-archive, not ${set[*]}: drop them, or name cgwalters-forge/agentic-job/secure-host at an earlier commit (docs/secure-host.md)"
+          echo "::error::secure-host now forwards to ckyrouac/actions/secure-host, which takes only config, check and image-archive, not ${set[*]}: drop them, or name ckyrouac/agentic-job/secure-host at an earlier commit (docs/secure-host.md)"
           exit 1
         fi
     - name: Select the host configuration
@@ -132,8 +132,8 @@ runs:
     # trust-store variables from /etc/egress-proxy/runner.env into
     # GITHUB_ENV, refusing any other name.
     # Includes actions#190: :z relabels the config volume on SELinux hosts.
-    # Includes actions#180: v0.6.9 reports refused methods/hosts without signed URLs.
-    - uses: cgwalters-forge/actions/secure-host@466a490e983ff07e6fb076fa4bd8b4d5f918fcd6 # main, with secure-host:v0.6.9
+    # ckyrouac/actions/secure-host@9dbbb0df96fee81f5f25ef530ff244c202bee078 runs secure-host:v0.6.16.
+    - uses: ckyrouac/actions/secure-host@9dbbb0df96fee81f5f25ef530ff244c202bee078 # main, with secure-host:v0.6.16
       with:
         config: ${{ steps.config.outputs.path }}
         check: ${{ inputs.check }}

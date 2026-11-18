@@ -15,7 +15,7 @@ Choose a full agentic-job commit you have reviewed and replace `COMMIT`
 before running these commands (the commit must contain this guide's examples):
 
 ```sh
-git clone https://github.com/cgwalters-forge/agentic-job.git
+git clone https://github.com/ckyrouac/agentic-job.git
 cd agentic-job
 git checkout COMMIT
 cargo build --locked -p agentic-job --bin agentic-job
@@ -62,7 +62,7 @@ concurrency:
 jobs:
   run:
     # Replace COMMIT with a full reviewed source commit.
-    uses: cgwalters-forge/agentic-job/.github/workflows/agentic-job.yml@COMMIT
+    uses: ckyrouac/agentic-job/.github/workflows/agentic-job.yml@COMMIT
     permissions:
       contents: read
       issues: read
@@ -120,7 +120,7 @@ Before dispatch, configure these settings in your repository:
   missing or wrong publishing credential, the existing optional
   `require-safe-outputs-pat: true` input checks it before the agent runs;
   it is off by default and not needed to follow this example.
-- **Settings.** Actions enabled, and `cgwalters-forge/agentic-job` and the
+- **Settings.** Actions enabled, and `ckyrouac/agentic-job` and the
   actions it pins allowed if the repository restricts actions. The pull
   request's CI runs as an outside contributor's would.
 

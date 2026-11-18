@@ -5,10 +5,10 @@
 What `agentic-job sandbox setup` adds to a host for an agent, and why.
 The host itself (what setup changes, the lock, the network rules and the
 egress proxy) is documented with the action that runs it:
-[setup](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/setup.md#what-the-step-does-to-the-host),
-[egress](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/egress.md)
+[setup](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/setup.md#what-the-step-does-to-the-host),
+[egress](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/egress.md)
 and the
-[threat model](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/threat-model.md#what-it-assumes).
+[threat model](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/threat-model.md#what-it-assumes).
 The code is `crates/secure-host/`, `crates/agentic-job/src/sandbox/` and `egress/`
 ([layout](layout.md)); `run`'s probes are in
 [sandbox-check.md](sandbox-check.md), the requirements it serves in
@@ -162,7 +162,7 @@ runner's user.
 
 `sandbox check` probes the host as the runner's user, with positive
 controls where the host provides them
-([probes](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/probes.md)):
+([probes](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/probes.md)):
 the lock, the metadata rule, the world-write policy, ptrace, the stopped
 services, the Worker's diagnostic sockets, the crypto policies and, under
 `egress.write-policy`, the proxy's refusal of a write. `sandbox probe
@@ -176,13 +176,13 @@ each protection in turn and requires that the matching probes fail
 keys, a setup script and a host without the world-write policy
 (`tests/sandbox_fresh.rs`). What that runner cannot show, and what was
 tried by hand elsewhere, is in the action's
-[evidence](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/evidence.md#where-each-probe-has-been-seen-to-fail).
+[evidence](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/evidence.md#where-each-probe-has-been-seen-to-fail).
 
 ## What it does not do
 
 What the host does not stop is in the action's
-[threat model](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/threat-model.md#not-claimed)
-and [egress](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/egress.md#what-egress-does-not-stop).
+[threat model](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/threat-model.md#not-claimed)
+and [egress](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/egress.md#what-egress-does-not-stop).
 For an agent in particular:
 
 - The agent can read whatever the runner's user can: the job's files,
@@ -199,7 +199,7 @@ For an agent in particular:
   proxy only on the host's network, and trusts it only if the
   certificate is mounted into it; nothing configures podman to do
   either. Use the
-  [container recipe](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/setup.md#containers)
+  [container recipe](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/setup.md#containers)
   for networked builds and runs.
 - `setup.npm` runs the packages' install scripts as root, which is why
   the list is the caller's and never the task's. `setup.agents` runs

@@ -5,7 +5,7 @@ const { inspect, BODY } = require('./guard.cjs');
 const proof = {
   id: 123,
   body: BODY,
-  html_url: 'https://github.com/cgwalters-forge/agentic-job/issues/64#issuecomment-123',
+  html_url: 'https://github.com/ckyrouac/agentic-job/issues/2#issuecomment-123',
   user: { id: 41898282, type: 'Bot' },
   performed_via_github_app: { id: 15368 },
 };

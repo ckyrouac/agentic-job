@@ -19,10 +19,10 @@ is read from this repository at the pinned commit; there is no copy to keep.
 A caller that kept an edited copy sets `AGENT_CONFIG` to its path.
 
 In `dispatch.yml`, replace `uses: ./.github/workflows/agentic-job.yml` with
-`uses: cgwalters-forge/agentic-job/.github/workflows/agentic-job.yml@COMMIT`,
+`uses: ckyrouac/agentic-job/.github/workflows/agentic-job.yml@COMMIT`,
 where `COMMIT` is the full reviewed SHA of the source you copied, **including
 the `review-item` and `fake-profile` inputs**. In the `target` job's checkout, replace
-`repository` and `ref` with `cgwalters-forge/agentic-job` and the same `COMMIT`: that job
+`repository` and `ref` with `ckyrouac/agentic-job` and the same `COMMIT`: that job
 runs `agentic-job dispatch` from it. A local reusable call here pins the workflow, binary
 and actions to this checkout's commit: it cannot silently run an older release.
 In `dispatch.toml`, replace `repos` with your exact public repository name.

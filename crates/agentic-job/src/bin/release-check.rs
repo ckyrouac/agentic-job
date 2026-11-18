@@ -96,7 +96,7 @@ fn forwarder_commit(action: &str) -> Result<String> {
     let pins: Vec<_> = steps
         .iter()
         .filter_map(|step| step["uses"].as_str())
-        .filter_map(|uses| uses.strip_prefix("cgwalters-forge/actions/secure-host@"))
+        .filter_map(|uses| uses.strip_prefix("ckyrouac/actions/secure-host@"))
         .collect();
     let [commit] = pins.as_slice() else {
         bail!("expected exactly one actions/secure-host forwarder pin");
@@ -112,7 +112,7 @@ fn check_image(pin: &str, tags: &str) -> Result<String> {
     let (_, newest) = newest_tag(tags)?.context("no vMAJOR.MINOR.PATCH tags after release")?;
     let image = pin
         .trim()
-        .strip_prefix("FROM ghcr.io/cgwalters-forge/secure-host:")
+        .strip_prefix("FROM ghcr.io/ckyrouac/secure-host:")
         .context("expected the secure-host image in Containerfile.pin")?;
     let (tag, digest) = image
         .split_once("@sha256:")
@@ -141,7 +141,7 @@ fn check_forwarder(tags: &str) -> Result<String> {
         .build()
         .into();
     let mut response = agent
-        .get(format!("https://raw.githubusercontent.com/cgwalters-forge/actions/{commit}/secure-host/Containerfile.pin"))
+        .get(format!("https://raw.githubusercontent.com/ckyrouac/actions/{commit}/secure-host/Containerfile.pin"))
         .call()
         .context("fetching forwarder's Containerfile.pin")?;
     let pin = read_tags(response.body_mut().as_reader())?;
@@ -230,7 +230,7 @@ mod tests {
     #[test]
     fn post_release_image_matches_newest_numeric_tag() {
         let pin = format!(
-            "FROM ghcr.io/cgwalters-forge/secure-host:v0.6.10@sha256:{}\n",
+            "FROM ghcr.io/ckyrouac/secure-host:v0.6.10@sha256:{}\n",
             "a".repeat(64)
         );
         for (tags, error) in [
@@ -262,7 +262,7 @@ mod tests {
 
     #[test]
     fn only_a_single_full_forwarder_commit_is_accepted() {
-        let uses = format!("cgwalters-forge/actions/secure-host@{}", "a".repeat(40));
+        let uses = format!("ckyrouac/actions/secure-host@{}", "a".repeat(40));
         let action = format!("runs:\n  steps:\n    - uses: {uses}\n");
         assert_eq!(forwarder_commit(&action).unwrap(), "a".repeat(40));
         for invalid in [

@@ -11,7 +11,7 @@
 //! sudo. It ends by taking that away ([`lock_runner`]): every step after
 //! it, the supervisor (`sandbox check`, `run`) and the job's own, runs as
 //! an unprivileged user that has root do only what the helper allows
-//! ([`crate::helper`]). cgwalters-forge/actions's secure-host/docs/setup.md
+//! ([`crate::helper`]). ckyrouac/actions's secure-host/docs/setup.md
 //! says what that closes, and its probes.md how the probes prove it.
 //!
 //! What the program built on this crate adds (agentic-job's agents and

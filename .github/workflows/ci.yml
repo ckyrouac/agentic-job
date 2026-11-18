@@ -603,7 +603,7 @@ jobs:
       # runs as, and the test puts each protection back as root: a shell
       # behind a socket only this user's group may connect to, started as
       # a service of its own before setup. It is this test's and nothing
-      # a job should have (cgwalters-forge/actions/secure-host's docs/evidence.md
+      # a job should have (ckyrouac/actions/secure-host's docs/evidence.md
       # says what it stands for).
       - name: Start the root service the test puts protections back through
         run: |
@@ -687,7 +687,7 @@ jobs:
   # The action as another repository names it, which a pull request
   # cannot do for its own commit: after a push to main, from main. The
   # runner fetches it as an archive without git; it forwards to
-  # cgwalters-forge/actions/secure-host, which verifies and runs the
+  # ckyrouac/actions/secure-host, which verifies and runs the
   # pinned, released image and proves the host before it returns.
   secure-host-published:
     if: ${{ github.event_name == 'push' }}
@@ -695,14 +695,14 @@ jobs:
     timeout-minutes: 30
     steps:
       - id: host
-        uses: cgwalters-forge/agentic-job/secure-host@main # zizmor: ignore[unpinned-uses] Deliberately test the public main-branch action in this fresh-runner integration job.
+        uses: ckyrouac/agentic-job/secure-host@main # zizmor: ignore[unpinned-uses] Deliberately test the public main-branch action in this fresh-runner integration job.
       # Prevent a green old-image job from masquerading as split acceptance.
       # Keep these reviewed deployment facts in sync with both action pins;
       # workflows.rs binds them to the forwarder's SHA and image-version comment.
       - name: Published executable and action compatibility
         env:
-          ACTION: 466a490e983ff07e6fb076fa4bd8b4d5f918fcd6
-          VERSION: 0.6.9
+          ACTION: 9dbbb0df96fee81f5f25ef530ff244c202bee078
+          VERSION: 0.6.16
           BIN_DIR: /usr/local/bin
         run: |
           if [ "$ACTION" = 466a490e983ff07e6fb076fa4bd8b4d5f918fcd6 ]; then
@@ -928,9 +928,8 @@ jobs:
       budget-usd: "1"
       artifact-prefix: event-
 
-  # An analysis of the topic branch comments on the named scratch issue and
-  # updates a section of its body; the bounds admit body updates only, but
-  # to any issue of this repository (workflow/analysis.toml).
+  # An analysis of the topic branch comments on the dedicated
+  # analysis E2E issue #3. The separate CLI publication proof uses issue #2.
   # No contents write permission: apply must not checkout/fetch/push a base.
   e2e-analysis:
     needs: [changes, static]
@@ -950,10 +949,10 @@ jobs:
       repo: ${{ github.repository }}
       base: ${{ github.head_ref || needs.changes.outputs.analysis-base || 'main' }}
       kind: analysis
-      task: Analyze the checked out topic branch, comment on the named scratch issue and update its body.
-      outputs: add_comment,update_issue
-      max-outputs: '2'
-      comment-target: '64'
+      task: Analyze the checked out topic branch and comment on the dedicated analysis E2E issue.
+      outputs: add_comment
+      max-outputs: '1'
+      comment-target: '3'
       notify: none
       allow: workflow/analysis.toml
       config: .github/agentic-job/hosted.toml
@@ -987,7 +986,7 @@ jobs:
       task: "Try to comment outside the caller's fixed destination."
       outputs: add_comment
       max-outputs: '1'
-      comment-target: '64'
+      comment-target: '3'
       notify: none
       allow: workflow/analysis.toml
       config: .github/agentic-job/hosted.toml
@@ -1592,6 +1591,7 @@ jobs:
       PEOPLE_BRANCH: ${{ needs.e2e-scratch.outputs.branch }}
       PEOPLE_LOGIN: ${{ needs.e2e-scratch.outputs.login }}
       ISSUE: "64"
+      ANALYSIS_ISSUE: "3"
       # What gh-aw's handlers end each comment of this run with.
       RUN: actions/runs/${{ github.run_id }}
     steps:
@@ -1603,6 +1603,11 @@ jobs:
         with:
           artifact-ids: ${{ needs.e2e-limit.outputs.applied-artifact-id }}
           path: ${{ runner.temp }}/limit
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: ${{ needs.e2e-analysis.result == 'success' }}
+        with:
+          artifact-ids: ${{ needs.e2e-analysis.outputs.applied-artifact-id }}
+          path: ${{ runner.temp }}/analysis
       - name: Both runs ended well, the second at a limit
         env:
           RESULTS: ${{ needs.e2e-full.result }} ${{ needs.e2e-limit.result }}
@@ -1700,14 +1705,15 @@ jobs:
           grep -F "an add\_comment with item\_number outside the caller's fixed item" <<< "$REFUSAL"
           test "$REFUSED_EXIT" = 0
           test -z "$REFUSED_APPLIED"
-          gh api --paginate "repos/$GH_REPO/issues/$ISSUE/comments" | jq -se --arg run "$RUN" '[ .[][] | select(.user.login == "github-actions[bot]" and (.body | contains($run)) and (.body | contains("A comment from the scripted agent of an event-triggered run."))) ] | length == 1'
-      # Its apply succeeded only if the update did. Another run's analysis
-      # may have replaced the section since, so the run is not looked for.
-      - name: "The topic-branch analysis updated the scratch issue's body"
-        run: gh api "repos/$GH_REPO/issues/$ISSUE" --jq .body | grep -F 'A body section from the scripted agent of a topic-branch analysis.'
+          gh api --paginate "repos/$GH_REPO/issues/$ANALYSIS_ISSUE/comments" | jq -se --arg run "$RUN" '[ .[][] | select(.user.login == "github-actions[bot]" and (.body | contains($run)) and (.body | contains("A comment from the scripted agent of an event-triggered run."))) ] | length == 1'
+      # Apply had only the comment handler, so the analysis could not update
+      # the issue body. The comment target is pinned by e2e-analysis above.
+      - name: The topic-branch analysis had no issue-body update handler
+        if: ${{ needs.e2e-analysis.result == 'success' }}
+        run: jq -e '.partial == false and (.handlers | keys) == ["add_comment"]' "$RUNNER_TEMP/analysis/applied.json"
       - name: The refused comment was not posted on either item
         run: |
-          for item in "$ISSUE" 65; do
+          for item in "$ANALYSIS_ISSUE" 65; do
             gh api --paginate "repos/$GH_REPO/issues/$item/comments" | jq -se --arg run "$RUN" 'any(.[][]; ((.body | contains($run)) and (.body | contains("This misdirected analysis must be refused.")))) | not'
           done
       - name: The listed user was assigned and asked to review the scratch pull request of this run
@@ -1806,7 +1812,7 @@ jobs:
           STARTED_FROM: ${{ github.event.pull_request.number }}
         run: |
           set -o pipefail
-          for issue in "$ISSUE" ${STARTED_FROM:+"$STARTED_FROM"}; do
+          for issue in "$ISSUE" "$ANALYSIS_ISSUE" ${STARTED_FROM:+"$STARTED_FROM"}; do
             gh api --paginate "repos/$GH_REPO/issues/$issue/comments" --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | contains(\"$RUN\"))).id" |
               xargs -r -I{} gh api -X DELETE "repos/$GH_REPO/issues/comments/{}"
           done
@@ -1977,7 +1983,7 @@ jobs:
 
   # The secure-host image as release.yml pushes it, from the archive the
   # static job saved, run through the public action, which forwards to
-  # cgwalters-forge/actions/secure-host with `image-archive`: root podman
+  # ckyrouac/actions/secure-host with `image-archive`: root podman
   # runs it, and it installs its binary on the host and sets the host up
   # through nsenter. The setup must outlive the container: after it has
   # exited, the runner's user has no sudo, docker is stopped, and the

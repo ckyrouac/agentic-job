@@ -2,9 +2,9 @@
 # or concurrent/rerun attempts duplicating a possibly already published proof.
 # Only a scoped main push here or explicit main dispatch opts in; serialize the
 # fixed destination and refuse incomplete lookups and absent-proof reruns.
-# No caller-selected revision,
-# target, code artifact or credential is executed in apply. Issue 64 is the
-# existing e2e-full destination.
+# No caller-selected revision, target, code artifact or credential is executed
+# in apply. Issue #2 is the standalone CLI proof target; CI e2e-full keeps its
+# separate issue-64 fixture.
 # check runs secure-host; apply is a trusted artifact consumer
 # (docs/workflows-check.md#trusted-artifact-consumers): it builds the CLI from
 # this run's commit outside its workspace and reads the artifact as data. That
@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: Post one deterministic proof comment on the fixed e2e issue 64
+        description: Post one deterministic proof comment on the fixed e2e issue #2
         type: boolean
         default: false
 
@@ -32,7 +32,7 @@ concurrency:
 
 jobs:
   check:
-    if: ${{ github.repository == 'cgwalters-forge/agentic-job' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)) }}
+    if: ${{ github.repository == 'ckyrouac/agentic-job' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)) }}
     runs-on: ubuntu-26.04
     timeout-minutes: 15
     permissions:
@@ -45,13 +45,13 @@ jobs:
         with:
           persist-credentials: false
       - name: Secure the host
-        uses: cgwalters-forge/actions/secure-host@de677fefc15c16cb85302bbb9a64732e44d78d75 # main, with secure-host:v0.6.4
+        uses: ckyrouac/actions/secure-host@9dbbb0df96fee81f5f25ef530ff244c202bee078 # main, with secure-host:v0.6.16
       - name: Build the standalone CLI
         run: cargo build --locked -p safe-outputs --bin safe-outputs
       - name: Construct and check a non-agent request without a write credential
         run: |
           mkdir proposals
-          jq -nc '{type:"add_comment",repo:"cgwalters-forge/agentic-job",item_number:64,body:"Standalone safe-outputs deterministic CLI proof."}' > proposals/outputs.jsonl
+          jq -nc '{type:"add_comment",repo:"ckyrouac/agentic-job",item_number:2,body:"Standalone safe-outputs deterministic CLI proof."}' > proposals/outputs.jsonl
           target/debug/safe-outputs check --context .github/agentic-job/e2e/safe-outputs-context.json --input proposals/outputs.jsonl --checked proposals/checked.json
       # A trusted consumer takes exactly one file, `artifact`, bound to
       # this job's output by its SHA-256.
@@ -71,7 +71,7 @@ jobs:
 
   apply:
     needs: check
-    if: ${{ github.repository == 'cgwalters-forge/agentic-job' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)) }}
+    if: ${{ github.repository == 'ckyrouac/agentic-job' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish == true)) }}
     runs-on: ubuntu-26.04
     timeout-minutes: 15
     environment: agent-apply
@@ -99,7 +99,7 @@ jobs:
           SHA: ${{ github.sha }}
         run: |
           git init -q "$RUNNER_TEMP/src"
-          git -C "$RUNNER_TEMP/src" fetch -q --depth 1 https://github.com/cgwalters-forge/agentic-job "$SHA"
+          git -C "$RUNNER_TEMP/src" fetch -q --depth 1 https://github.com/ckyrouac/agentic-job "$SHA"
           git -C "$RUNNER_TEMP/src" checkout -q FETCH_HEAD
           cargo build --locked --manifest-path "$RUNNER_TEMP/src/Cargo.toml" -p safe-outputs --bin safe-outputs
       - name: Unpack the request and its receipt as data
@@ -123,7 +123,7 @@ jobs:
           src="$RUNNER_TEMP/src"
           "$src/target/debug/safe-outputs" apply --context "$src/.github/agentic-job/e2e/safe-outputs-context.json" \
             --input "$RUNNER_TEMP/proposals/outputs.jsonl" --checked "$RUNNER_TEMP/proposals/checked.json"
-      # A lost POST response fails apply: do not retry it. Inspect issue 64 and
+      # A lost POST response fails apply: do not retry it. Inspect issue #2 and
       # the job logs; a rerun can reuse an existing comment but cannot post anew.
       - name: Read back and link the proof comment
         env:

@@ -775,7 +775,11 @@ mod tests {
             env!("CARGO_MANIFEST_DIR"),
             "/../../.github/agentic-job/hosted.toml"
         );
-        for (repo, cargo) in [("cgwalters-forge/agentic-job", true), ("o/other", false)] {
+        for (repo, cargo) in [
+            ("ckyrouac/agentic-job", true),
+            ("cgwalters-forge/agentic-job", false),
+            ("o/other", false),
+        ] {
             let args = Args {
                 repo: Some(repo.to_owned()),
                 ..args(Some(hosted), RUN, LIMITS, &[])

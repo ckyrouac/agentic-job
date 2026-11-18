@@ -216,7 +216,7 @@ jobs:
         with:
           artifact-ids: ${{ inputs.secure-host-image-artifact-id }}
           path: ${{ runner.temp }}/secure-host-image
-      # cgwalters-forge/actions/secure-host, through the forwarder of the
+      # ckyrouac/actions/secure-host, through the forwarder of the
       # policy job's commit, which pins it: its image takes root from this
       # job and proves it. Every step after it is this file's, as the
       # runner's user without root, and so is the agent (tracker#674).

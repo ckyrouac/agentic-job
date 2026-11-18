@@ -124,8 +124,8 @@ all under the agentic-job crate unless a root path is given, all of
 `crates/safe-outputs/`'s `contract.rs`, `bounds.rs`, `check/`
 (especially patch parsing) and `apply/` (publishing and its git push). Keep size/count/path/type
 limits, no-follow regular-file reads and fail-closed refusals intact.
-See the host's [threat model](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/threat-model.md)
-and [probe coverage](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/probes.md),
+See the host's [threat model](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/threat-model.md)
+and [probe coverage](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/probes.md),
 and the agent's [host](sandbox.md) and [check](sandbox-check.md).
 
 Do not edit generated `safe-outputs/validation.json` by hand or vendor gh-aw;

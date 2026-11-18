@@ -133,7 +133,7 @@ No consumer exception is enabled by default; a job must fit the whole shape.
 | Conditions, failure suppression or extra fields on the download/check; a later condition that can bypass success | Consumption after a skipped or failed verification |
 | Workflow or job `env:`/`defaults:`, extra check env keys, `container:`, `services:` or job `continue-on-error:` | Loading code into the downloader or shell, changing how verification runs, or hiding failure |
 
-For the [secure-host README contract](https://github.com/cgwalters-forge/actions/blob/main/secure-host/README.md),
+For the [secure-host README contract](https://github.com/ckyrouac/actions/blob/main/secure-host/README.md),
 replace the placeholder `verify-digest` with the following consumer. The build
 job uploads exactly one file, `artifact`, exports its SHA-256 as `digest`, and
 exports upload-artifact's `artifact-id` as `id`. Compute the file's digest with
@@ -339,7 +339,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          repository: cgwalters-forge/agentic-job
+          repository: ckyrouac/agentic-job
           ref: 23e74c719b7a50c9f576a5de4e630eeeb13ea357
           path: checker
           persist-credentials: false

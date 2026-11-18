@@ -8,7 +8,7 @@
 //! probes. So that the binary can stand in for
 //! agentic-job by that name, for one release ([`crate::image`]), `config`
 //! takes `--host` and `sandbox` has the probes; those are what the
-//! pinned cgwalters-forge/actions/secure-host and agentic-job's actions
+//! pinned ckyrouac/actions/secure-host and agentic-job's actions
 //! call it for.
 
 use std::path::{Path, PathBuf};
@@ -219,7 +219,7 @@ mod tests {
     #[test]
     fn it_answers_what_agentic_job_was_called_for() {
         for args in [
-            // cgwalters-forge/actions/secure-host: config.mjs and "Prove it".
+            // ckyrouac/actions/secure-host: config.mjs and "Prove it".
             &[
                 "config",
                 "--host",

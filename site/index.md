@@ -57,7 +57,7 @@ jobs:
     steps:
       - run: sudo apt-get install -y libfoo-dev   # root: before the step
       - uses: actions/checkout@v7
-      - uses: cgwalters-forge/actions/secure-host@COMMIT
+      - uses: ckyrouac/actions/secure-host@COMMIT
       - run: make check                           # runner's user, no sudo
 ```
 

@@ -6,7 +6,7 @@
 # in `bots`: these bounds check the actor, the `if:` the author.
 # The agent reviews the head as data, without a credential.
 hosts = ["github.com"]
-repos = ["cgwalters-forge/agentic-job"]
+repos = ["ckyrouac/agentic-job"]
 bases = ["main"]
 max_outputs = 12
 max_patch_bytes = 1024

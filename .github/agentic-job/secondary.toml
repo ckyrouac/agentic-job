@@ -3,7 +3,7 @@
 # in misctool, a public repository the runs only clone. Apply is staged,
 # so neither is opened: CI holds no SAFE_OUTPUTS_PAT to fork with.
 hosts = ["github.com"]
-repos = ["cgwalters-forge/agentic-job"]
+repos = ["ckyrouac/agentic-job"]
 bases = ["main"]
 max_outputs = 2
 max_patch_bytes = 65536

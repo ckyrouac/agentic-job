@@ -64,7 +64,7 @@ run. What separates the agent there is the job's read-only tokens, no
 and the check on another machine
 ([requirements.md](requirements.md#actors-and-trust)).
 [sandbox-check.md](sandbox-check.md#the-helper) describes the helper, and the action's
-[lock](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/setup.md#the-lock) its limits.
+[lock](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/setup.md#the-lock) its limits.
 
 `check` intentionally handles only half the validation. gh-aw's rules define
 request types, counts and text sanitization. `collect` ports these rules,
