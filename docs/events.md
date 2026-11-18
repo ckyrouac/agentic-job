@@ -138,7 +138,7 @@ jobs:
     concurrency:
       group: label-review-${{ github.event.issue.number || github.event.pull_request.number }}
       cancel-in-progress: false
-    uses: cgwalters-forge/agentic-job/.github/workflows/agentic-job.yml@COMMIT
+    uses: ckyrouac/agentic-job/.github/workflows/agentic-job.yml@COMMIT
     permissions:
       contents: read
       id-token: write

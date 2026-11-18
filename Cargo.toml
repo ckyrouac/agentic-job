@@ -7,7 +7,7 @@ version = "0.6.16"
 edition = "2024"
 rust-version = "1.88"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/cgwalters-forge/agentic-job"
+repository = "https://github.com/ckyrouac/agentic-job"
 publish = false
 
 # Shared by every crate, so a version is chosen once.

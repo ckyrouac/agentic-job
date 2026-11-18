@@ -52,7 +52,7 @@ separate jobs on separate machines. The apply job's additional checks are
    depend on its success; removal failure starts neither. Runs not started
    by a command label pass through without writing.
 2. **agent**, on the caller's runner. [The step that secures a host for
-   any job](secure-host.md), `cgwalters-forge/actions/secure-host` through
+   any job](secure-host.md), `ckyrouac/actions/secure-host` through
    the `secure-host/` forwarder, removes general root access and probes
    the configured restrictions (`agentic-job sandbox setup` and
    `sandbox check`, in its image); `run --runner-home` clones the target,
@@ -112,7 +112,7 @@ CI processes. Endpoint-only inference and a fail-closed readiness gate remain
 | Where | What it holds |
 | --- | --- |
 | The agent | the agent job's own `GITHUB_TOKEN` as `GH_TOKEN`, with `contents`, `issues`, `pull-requests` and `actions` **read** only, expiring with the job, unless `github-reads: false` ([GitHub reads](#github-reads-from-the-agent)); the inference proxy's token for this one run. Not the identity-token request credential, not a model key, not an MCP server's credential, not `SAFE_OUTPUTS_PAT` |
-| The runner's user in the agent job | the agent itself: so the reusable workflow's agent job passes on no model key or MCP credential, and `run --runner-home` refuses `api-key` and MCP servers ([the agent job](#running-it-on-github)); the same read-only job token; under `github-oidc`, the run token the register job before it got, in the `run` step only (the agent job has no `id-token`: [the run token](#the-run-token)); `ACTIONS_RUNTIME_TOKEN` in JavaScript actions; whatever the caller's own steps add, such as a network join. Losing root does not separate a step from these ([what a later step can still do](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/threat-model.md#one-trust-level-for-the-rest-of-the-job)) |
+| The runner's user in the agent job | the agent itself: so the reusable workflow's agent job passes on no model key or MCP credential, and `run --runner-home` refuses `api-key` and MCP servers ([the agent job](#running-it-on-github)); the same read-only job token; under `github-oidc`, the run token the register job before it got, in the `run` step only (the agent job has no `id-token`: [the run token](#the-run-token)); `ACTIONS_RUNTIME_TOKEN` in JavaScript actions; whatever the caller's own steps add, such as a network join. Losing root does not separate a step from these ([what a later step can still do](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/threat-model.md#one-trust-level-for-the-rest-of-the-job)) |
 | `policy`, `check` | the job token with `contents` and `actions` read; no secret. With `require-safe-outputs-pat`, the policy call's `apply-token` job reads with `SAFE_OUTPUTS_PAT` in one step, in the apply environment |
 | `apply` | `SAFE_OUTPUTS_PAT` when the call passes a nonempty one, else the job token with what the call granted ([the apply job and its token](#the-apply-job-and-its-token)) |
 | `activate`, `notify`, `conclude` | the job token with what the call granted, for labels, reactions and status comments; notify and conclude prefer `SAFE_OUTPUTS_PAT` for status comments whenever supplied, including same-repository items |
@@ -298,7 +298,7 @@ inference broker with the job's identity token. With `id-token: write`
 any step of a job, and anything that becomes the runner's user, can
 mint identity tokens for any audience, not only the broker's: a cloud
 whose trust policy admits this repository would take them
-([one trust level for the rest of the job](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/threat-model.md#one-trust-level-for-the-rest-of-the-job)).
+([one trust level for the rest of the job](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/threat-model.md#one-trust-level-for-the-rest-of-the-job)).
 So `agentic-job.yml` registers in a job of its own, `register`, before
 the agent's. It has `id-token: write` and no other permission, checks
 out nothing, and runs only the policy job's binary
@@ -449,7 +449,7 @@ through a reusable workflow's call: such a caller calls
 ```yaml
 jobs:
   policy:
-    uses: cgwalters-forge/agentic-job/.github/workflows/policy.yml@COMMIT
+    uses: ckyrouac/agentic-job/.github/workflows/policy.yml@COMMIT
     permissions:
       contents: read
       actions: read
@@ -545,7 +545,7 @@ jobs:
       contents: read
       actions: read
       id-token: write
-    uses: cgwalters-forge/agentic-job/.github/workflows/check.yml@COMMIT
+    uses: ckyrouac/agentic-job/.github/workflows/check.yml@COMMIT
     with:
       policy: ${{ toJSON(needs.policy.outputs) }}
       safe-outputs-artifact-id: ${{ needs.agent.outputs.safe-outputs-artifact-id }}
@@ -554,7 +554,7 @@ jobs:
   apply:
     needs: [policy, agent, check]
     if: ${{ always() && needs.policy.result == 'success' }}
-    uses: cgwalters-forge/agentic-job/.github/workflows/apply.yml@COMMIT
+    uses: ckyrouac/agentic-job/.github/workflows/apply.yml@COMMIT
     permissions:
       contents: read
       issues: write
@@ -624,7 +624,7 @@ Leave alone what `prepare` wrote: `.agentic-job`, `.agentic-job-source`
 and `/usr/local/bin/agentic-job`. Leave no credential on the machine:
 the agent is the runner's user and can read whatever that user can. A step that has to undo
 itself at the end of the job can do so only without sudo
-([what a job has to know](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/setup.md#what-a-job-has-to-know)).
+([what a job has to know](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/setup.md#what-a-job-has-to-know)).
 
 **Your later steps** go after `run`. They run as the runner's user, the
 agent's, without sudo, after the agent's outputs were uploaded. They can
@@ -671,14 +671,14 @@ after its network join and before secure-host, as
 `session-endpoint` from the run action's step instead.
 
 Its secure-host step names `./.agentic-job-source/secure-host`, which
-forwards to `cgwalters-forge/actions/secure-host` and refuses `binary`;
+forwards to `ckyrouac/actions/secure-host` and refuses `binary`;
 the old action with a second user is gone. Give it the policy job's
 configuration through `agentic-job config --host --no-script`, run the
 configuration's setup script after it with `workflow/runner-setup.py
 setup`, and give `run` a `runner-home`, which it requires, and drop
 `id-token` from the job, as
 [above](#the-pieces-and-an-agent-job-of-your-own)
-([secure-host.md](secure-host.md#the-public-action-forwards-to-cgwalters-forgeactionssecure-host)).
+([secure-host.md](secure-host.md#the-public-action-forwards-to-ckyrouacactionssecure-host)).
 
 ### Migrating a direct call of check.yml
 
@@ -722,7 +722,7 @@ of the reusable workflow and of `run`, which job makes it, what it
 depends on, and whether the policy job could have made it from what it
 already had: the call's inputs, the bounds, the `config.toml`,
 `policy.json`, `run.json` and `task.md` it writes. Functions are named,
-not lines, which move. The pinned `cgwalters-forge/actions/secure-host`
+not lines, which move. The pinned `ckyrouac/actions/secure-host`
 action's own refusals are its documentation's.
 
 | Job / step | Depends on | Where | Refuses | At policy time? |
@@ -859,7 +859,7 @@ No caller-specific repository, account or network is required by agentic-job.
 
 Runner labels are kept current by Renovate, through
 [`.github/renovate.json`](../.github/renovate.json) and the shared
-[runner preset](https://github.com/cgwalters-forge/actions/blob/main/renovate/README.md):
+[runner preset](https://github.com/ckyrouac/actions/blob/main/renovate/README.md):
 it proposes moving a literal GitHub-hosted Ubuntu label in `runs-on` to the
 newest one and nothing else; Dependabot keeps the action pins, and nothing
 updates the digest-pinned forgejo image. It does nothing until an
@@ -1059,7 +1059,7 @@ jobs:
           if-no-files-found: error
   apply:
     needs: proposals # uploads outputs.jsonl as board-proposals
-    uses: cgwalters-forge/agentic-job/.github/workflows/agentic-job.yml@COMMIT
+    uses: ckyrouac/agentic-job/.github/workflows/agentic-job.yml@COMMIT
     permissions:
       contents: read
       issues: write # apply may post the allowed comments
@@ -1111,7 +1111,7 @@ Either copy `.github/agentic-job/hosted.toml` too, or set `config` to
 `.agentic-job-source/.github/agentic-job/hosted.toml`, which the workflow
 reads from its own source at the pinned commit, so the pin covers the
 hardening and there is no copy to keep. Replace `uses: ./.github/workflows/agentic-job.yml` with
-`uses: cgwalters-forge/agentic-job/.github/workflows/agentic-job.yml@COMMIT`,
+`uses: ckyrouac/agentic-job/.github/workflows/agentic-job.yml@COMMIT`,
 using a reviewed commit. Replace the bounds file's `repos` with your
 public repository; the example's `repo` input is empty by default, which
 means the repository it runs in. The allowed base is `main`. Keep the permissions. Commit to your default branch, enable
@@ -1129,7 +1129,7 @@ The call itself:
 ```yaml
 jobs:
   run:
-    uses: cgwalters-forge/agentic-job/.github/workflows/agentic-job.yml@COMMIT
+    uses: ckyrouac/agentic-job/.github/workflows/agentic-job.yml@COMMIT
     permissions:
       contents: read
       issues: read
@@ -1193,7 +1193,7 @@ cannot reach a private proxy.
   [network step](review.md#configuration) mints a single-use join key in
   register and passes it as a secret to the agent job.
 - **Broker admission:** the broker operator must enable a `called_workflows`
-  policy entry for `cgwalters-forge/agentic-job/.github/workflows/agentic-job.yml`,
+  policy entry for `ckyrouac/agentic-job/.github/workflows/agentic-job.yml`,
   the exact commit pinned by the caller (`job_workflow_sha`), and the calling
   repository's numeric id (not just its name). Update that entry when the
   workflow pin changes. An agent job of your own is your workflow's, not
@@ -1329,7 +1329,7 @@ systemd 257 or later (for `run0`), and `apt-get` or `dnf`. `sandbox
 setup` refuses a machine it has set up before, and ends by taking root
 away from the runner's user: every step after it, this workflow's and
 the actions' cleanup steps, runs without it
-([the lock](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/setup.md#the-lock)),
+([the lock](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/setup.md#the-lock)),
 which is one more reason the machine must not be one that runs another
 job afterwards. `runner` is for the other
 three jobs and defaults to `ubuntu-26.04`; where no release fits the
@@ -1496,7 +1496,7 @@ your repository:
   [another repository](review.md#another-repository).
 
 In each other caller, replace `uses: ./.github/workflows/agentic-job.yml` with
-`uses: cgwalters-forge/agentic-job/.github/workflows/agentic-job.yml@COMMIT`,
+`uses: ckyrouac/agentic-job/.github/workflows/agentic-job.yml@COMMIT`,
 using a reviewed commit. In its bounds file, set `repos` to your public
 repository and `bases` to the base branches you allow. Keep the caller's
 permissions and commit all its companion files to your default branch.
@@ -1839,7 +1839,7 @@ To set it up:
     ```yaml
     jobs:
       apply:
-        uses: cgwalters-forge/agentic-job/.github/workflows/agentic-job.yml@COMMIT
+        uses: ckyrouac/agentic-job/.github/workflows/agentic-job.yml@COMMIT
         permissions:
           contents: read
           issues: read
@@ -2504,7 +2504,7 @@ The retry and requirements-file regression tests already address part of
 [#108](https://github.com/cgwalters-forge/agentic-job/issues/108). That issue
 still tracks a CI embedded-source scan that handles `concat!` and multiline macros. The
 world-write walk it also tracked is gone, replaced by the access-time
-policy ([world-write](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/world-write.md#access-time-world-write-policy)).
+policy ([world-write](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/world-write.md#access-time-world-write-policy)).
 Source-attested prebuilt releases now replace manual release pins;
 their trust model is described below.
 
@@ -2711,7 +2711,7 @@ updates:
       default-days: 7
     groups: # every piece on one version, in one pull request
       agentic-job:
-        patterns: ["cgwalters-forge/agentic-job*"]
+        patterns: ["ckyrouac/agentic-job*"]
 ```
 
 A tag can be moved or deleted by anyone who can push tags unless the

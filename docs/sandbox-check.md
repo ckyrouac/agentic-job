@@ -16,9 +16,9 @@ setup`, and probes that user's hardening: since
 [#2989](https://github.com/cgwalters-forge/agentic-job/issues/2989) it is
 the only agent user, and there is no second user to probe as. What each
 probe tries, its control and what stops it are in the action's
-[probes](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/probes.md),
+[probes](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/probes.md),
 and where each has been seen to fail in its
-[evidence](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/evidence.md#where-each-probe-has-been-seen-to-fail).
+[evidence](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/evidence.md#where-each-probe-has-been-seen-to-fail).
 This page keeps how `run` uses the check, the token probes `run` no
 longer makes, and the helper. A probe or a control that comes out wrong
 fails the check: exit state 1.
@@ -117,7 +117,7 @@ none runs ([sandbox.md](sandbox.md#what-is-tested)). The ids
 ## The helper
 
 The lock takes root from the runner's user
-([the lock](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/setup.md#the-lock)).
+([the lock](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/setup.md#the-lock)).
 What a run still needs root for is small: read the egress proxy's log,
 tailscaled's status as root, and the session bridge's serve. Entering
 and stopping the sandbox user, and undoing a probe's linger or crontab,
@@ -156,5 +156,5 @@ completion needs no root. A self-hosted runner that is not ephemeral
 would keep a locked machine: `agent-runner` must be thrown away after
 the job, as [workflow.md](workflow.md) requires. A caller who does not want this
 sets `host.lock-runner = false`, and gives up what the action's
-[R4](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/threat-model.md#r4-the-runners-user-loses-root-before-untrusted-steps-run)
+[R4](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/threat-model.md#r4-the-runners-user-loses-root-before-untrusted-steps-run)
 promises.

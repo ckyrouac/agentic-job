@@ -1,6 +1,6 @@
 # A job that runs no agent, as another repository would write one: it
 # secures its host first and then builds and tests as any job does.
-# cgwalters-forge/actions/secure-host's docs/setup.md says what the step
+# ckyrouac/actions/secure-host's docs/setup.md says what the step
 # does and what a job has to know.
 #
 # The order is the whole of it. Everything that needs root comes before
@@ -45,9 +45,9 @@ jobs:
         with:
           name: ${{ inputs.image-artifact }}
           path: ${{ runner.temp }}/image
-      # The forwarder to cgwalters-forge/actions/secure-host. A job of
+      # The forwarder to ckyrouac/actions/secure-host. A job of
       # another repository names that action by the commit it has read:
-      #   uses: cgwalters-forge/actions/secure-host@COMMIT
+      #   uses: ckyrouac/actions/secure-host@COMMIT
       - name: Secure the host
         uses: ./secure-host # zizmor: ignore[self-repository] Exercise the checked-out forwarder under test.
         with:

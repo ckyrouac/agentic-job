@@ -7,7 +7,7 @@ of a job, like a build script from a pull request or a dependency's
 install hook, and what protects a job from one protects it from the
 others. So the hardening is a step of its own that any job can run
 before untrusted steps, whether or not an agent runs afterwards:
-[`cgwalters-forge/actions/secure-host`](https://github.com/cgwalters-forge/actions/blob/main/secure-host/README.md),
+[`ckyrouac/actions/secure-host`](https://github.com/ckyrouac/actions/blob/main/secure-host/README.md),
 which runs the image this repository builds. Later workflow steps run as
 the runner's user, which is also the agent's user. The former second-user
 direction is superseded by [#2989](https://github.com/cgwalters-forge/agentic-job/issues/2989);
@@ -34,7 +34,7 @@ jobs:
     steps:
       - run: sudo apt-get install -y libfoo-dev   # root: before the step
       - uses: actions/checkout@v7
-      - uses: cgwalters-forge/actions/secure-host@COMMIT
+      - uses: ckyrouac/actions/secure-host@COMMIT
       - run: make check                           # runner's user, no sudo
 ```
 
@@ -42,14 +42,20 @@ Losing root does not hide the job's tokens from later steps. The reusable
 workflow keeps write credentials in separate jobs
 ([token boundaries](workflow.md#which-tokens-reach-what)).
 
-## The public action forwards to cgwalters-forge/actions/secure-host
+## The public action forwards to ckyrouac/actions/secure-host
 
 [`secure-host/action.yml`](../secure-host/action.yml) forwards to
-`cgwalters-forge/actions/secure-host` at a pinned commit, which runs the
-attested, digest-pinned [image](#where-the-binary-and-image-come-from)
+`ckyrouac/actions/secure-host` at
+[`9dbbb0df96fee81f5f25ef530ff244c202bee078`](https://github.com/ckyrouac/actions/commit/9dbbb0df96fee81f5f25ef530ff244c202bee078),
+which runs the public, attested v0.6.16 image with digest
+`sha256:f0da375d69800befddc79bbcd4722555022ed23427607c2297b933dccfdb28d2`.
+Release run [#44126840510](https://github.com/ckyrouac/agentic-job/actions/runs/44126840510)
+passed. No fresh host canary has run for v0.6.16; release verification is
+not host-canary evidence. The action runs the attested, digest-pinned
+[image](#where-the-binary-and-image-come-from)
 ([tracker#674](https://github.com/cgwalters-forge/tracker/issues/674)).
 It passes on `config`, `check` and `image-archive`. A caller that names
-`cgwalters-forge/agentic-job/secure-host` at a commit from before the
+`ckyrouac/agentic-job/secure-host` at a commit from before the
 forward keeps the old action. At `@main` or a later commit:
 
 - The new action's contract has no second user to run steps as: every
@@ -75,8 +81,8 @@ forward keeps the old action. At `@main` or a later commit:
   refuses a pin whose two copies differ, whose tag is older than v0.6.9
   (the required runner storage rules), or newer than the workspace's version.
 - The floor is ubuntu-26.04, the runner the new action is written for;
-  the pinned image admits exactly Ubuntu 26.04 and RHEL 10
-  ([supported hosts](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/setup.md#supported-hosts)).
+  the pinned image admits Ubuntu 26.04, RHEL 10 and CentOS Stream 10
+  ([supported hosts](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/setup.md#supported-hosts)).
 - Setting another input of the old action that chose the host fails the
   step and names the new action: `lock`, `egress`,
   `deny-runner-metadata`, `egress-policy`, `stop-services`,
@@ -84,11 +90,11 @@ forward keeps the old action. At `@main` or a later commit:
   asked for a host the new action would not set up, so the step does
   not ignore it. A configuration file says the same things.
 
-### What main has that the pinned image does not yet
+### Changes since the historical v0.6.9 image
 
-The action's documents describe the image it pins (v0.6.9). Main has
-changed the host since, and a forwarder caller gets these only with the
-next image release:
+The current pin is v0.6.16. The following records changes since the old
+v0.6.9 image; the v0.6.16 release run passed, but no fresh host canary has
+run, so this is not host-runtime acceptance evidence:
 
 - The Ubuntu `packages` stage shares a 45-second deadline across package
   downloads and, if needed, one index refresh and download retry. A stuck
@@ -108,8 +114,9 @@ next image release:
   sssd-kcm, gssproxy and sshd (including `sshd-unix-local.socket`) so
   untrusted code cannot reach those listeners; it adds no socket
   exceptions. An explicit `config` still replaces the default whole.
-  The pinned image does not yet admit CentOS Stream 10, even with this
-  default; use an image built from this source until the pin moves.
+  The historical v0.6.9 image did not yet admit CentOS Stream 10, even
+  with this default; use an image built from this source when testing that
+  change.
 - Under `host.deny-runner-reads`, setup discards every core dump on the
   host: it sets `kernel.core_pattern` to `|/bin/false`, and `secure-host
   check` fails its `core-pattern` probe on a host without it. The
@@ -127,17 +134,17 @@ next image release:
   needs them sets `host.deny-runner-reads = false`. CI's `confined` job
   probes each route in its control before secure-host and requires it to
   fail after. It forces a dump only of a child of its own that carries a
-  marker, never of the Worker. Until the pin moves, a host the pinned
-  image sets up keeps its dumps, and the check the run action runs is
-  that image's binary, which does not look. `run` still refuses an inference
+  marker, never of the Worker. With the historical v0.6.9 pin, the host
+  kept its dumps and the check the run action ran was that image's binary,
+  which did not look. `run` still refuses an inference
   provider's key, an MCP credential, the OIDC request and the rest under
   `--runner-home` ([sandbox](sandbox.md)). These probes are the evidence
   a later decision to lift any of them would rest on, and they do not
   lift them.
 
-### Deployed write-policy diagnostics
+### Historical v0.6.9 write-policy diagnostics
 
-The forwarder selects actions commit
+At the time of this historical deployment, the forwarder selected actions commit
 `466a490e983ff07e6fb076fa4bd8b4d5f918fcd6`, the reviewed
 [#180](https://github.com/cgwalters-forge/actions/pull/180) deployment,
 whose `Containerfile.pin` names the attested v0.6.9 image, digest
@@ -176,7 +183,8 @@ passed:
   holding the artifact; the upload step's log names no host. So the run
   shows one admitted destination, not where a refused upload would have gone.
 
-That is pull request evidence, not default-branch adoption. On 2026-11-09
+Historical status as of 2026-11-09: that was pull request evidence, not
+default-branch adoption. At that time
 actions' `main` (`eef41d3b216c731fda0960d6c9876a6ab3cd159a`) still pins the
 example to `c9a9501729bc306f3efdc188056b51149c1c9398`, whose image is v0.6.4,
 digest `sha256:df9133ce3d7ca05c9de0c5eb7d1f6c662065288191ac857d6c877ab5833e5b49`;
@@ -196,6 +204,13 @@ consumer result; until then #2811 stays open. The pin is actions' to land;
 this repository does not duplicate it. Tracker and other callers of actions'
 wrappers must select the corrected deployment themselves: neither this
 forwarder update nor #228 moves their pins.
+
+This historical upstream adoption status has since been superseded:
+[`ckyrouac/actions` PR #1](https://github.com/ckyrouac/actions/pull/1)
+merged by rebase at
+`9dbbb0df96fee81f5f25ef530ff244c202bee078`, and this repository now pins
+that action and the public, attested v0.6.16 image documented above. The
+release run passed; no fresh host canary has run for v0.6.16.
 
 The historical refusals, agentic-job run
 [41476599777](https://github.com/cgwalters-forge/agentic-job/actions/runs/41476599777)
@@ -239,7 +254,7 @@ the explicit proxy (unless a caller's own policy grants them).
 A self-hosted CI job, or a VM of its own, needs the binary **and its matching
 `world_write.bpf.o`**, from a verified release or a trusted source build
 ([provenance](#where-the-binary-and-image-come-from)). On a fresh disposable
-[supported host](#what-main-has-that-the-pinned-image-does-not-yet), load the
+[supported host](#changes-since-the-historical-v069-image), load the
 object as root before setup, then check as the user the later steps run as:
 
 ```sh
@@ -323,9 +338,9 @@ every image is
 
 The agent is then a later step like any other: no root, the metadata
 service only where the configuration leaves it open
-([above](#what-main-has-that-the-pinned-image-does-not-yet)), and, as
+([above](#changes-since-the-historical-v069-image)), and, as
 the action's
-[threat model](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/threat-model.md#what-a-later-step-can-count-on-and-what-it-cannot)
+[threat model](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/threat-model.md#what-a-later-step-can-count-on-and-what-it-cannot)
 says, nothing between it and the job's own tokens. So the agent job
 must not hold credentials it expects to hide from the agent. It still holds
 the run token and, by default, a read-only forge token; credentialless
@@ -342,7 +357,7 @@ machine before a job with a write token acts on it
 ### The egress write policy for an agent job
 
 Without the
-[egress write policy](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/egress.md#egress-write-policy-opt-in),
+[egress write policy](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/egress.md#egress-write-policy-opt-in),
 the runner's writes go anywhere but the metadata service. Host setup keeps
 it opt-in, through `egress.write-policy` in its configuration. An agent
 run with the proxy enabled now requires the write policy: `config` turns
@@ -355,7 +370,7 @@ runner's uid, so it gets the runner's own write rules: it can write to
 the Actions service with a token of its own, such as another
 repository's runtime token, and upload what it read there, and the
 pinned image's storage rules admit only the exact results accounts
-[listed above](#deployed-write-policy-diagnostics). There is no
+[listed above](#historical-v069-write-policy-diagnostics). There is no
 supported second-user escape from that channel. The agent job refuses
 a private caller or target with the write policy on
 ([private-repositories.md](private-repositories.md#opting-in)).
@@ -563,7 +578,7 @@ copy the program's step installed as the helper, and holds the egress
 proxy and the network rules to the table; without it, its own copy is
 the helper.
 
-The pinned cgwalters-forge/actions/secure-host calls the image's binary
+The pinned ckyrouac/actions/secure-host calls the image's binary
 by agentic-job's name: `--entrypoint /agentic-job ... config --host`,
 and `agentic-job sandbox check` on the host. For one release the image
 answers to both: it has the binary at `/secure-host` and
@@ -584,8 +599,9 @@ is not published-path acceptance.
 
 ### Published standalone acceptance (#2070)
 
-Rechecked on 2026-11-09: the effective action, image digest and source
-remain [the v0.6.9 deployment above](#deployed-write-policy-diagnostics).
+Historical recheck on 2026-11-09: the effective action, image digest and
+source at that time remained
+[the v0.6.9 deployment above](#historical-v069-write-policy-diagnostics).
 The actual Ubuntu
 [`secure-host-published` setup/check](https://github.com/cgwalters-forge/agentic-job/actions/runs/42143295583/job/127648635121)
 verified that image's attestation, completed setup and passed 96 checks.
@@ -647,12 +663,12 @@ while these deployment and runtime obligations remain.
 ## Where the binary and image come from
 
 The host's binary is the image's. A release pushes
-`ghcr.io/cgwalters-forge/secure-host:vVERSION`, an image `FROM scratch`
+`ghcr.io/ckyrouac/secure-host:vVERSION`, an image `FROM scratch`
 with the static secure-host binary and the compiled world-write object
 `world_write.bpf.o` ([`Containerfile`](../secure-host/Containerfile)),
 and attests it by its digest from `release.yml` on main; what the image
 does on the host is in the action's
-[setup](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/setup.md#the-image).
+[setup](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/setup.md#the-image).
 A new package on ghcr.io is private until an owner makes it public.
 Version releases and main's attested workflow artifacts also contain
 `secure-host-x86_64-unknown-linux-musl`, its checksum in the attested
@@ -686,15 +702,15 @@ it beside `/usr/local/bin/agentic-job`.
 
 ## Where the host documentation went
 
-Each topic is a document of `cgwalters-forge/actions/secure-host`:
+Each topic is a document of `ckyrouac/actions/secure-host`:
 
 | Topic | There |
 | --- | --- |
-| The contract, the caveats of running every step as the runner's user, the sandbox user | [README](https://github.com/cgwalters-forge/actions/blob/main/secure-host/README.md) |
-| What a later step can count on, one trust level for the rest of the job, R4, R10 and R11 | [threat model](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/threat-model.md) |
-| The image, supported hosts, what setup does to the host, the lock, what a job has to know, containers, running it without the action | [setup](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/setup.md) |
-| The egress write policy, the proxy's policy file and domain allowlist, the network rules | [egress](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/egress.md) |
-| The access-time world-write policy, its loader, and what went with the walk | [world-write](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/world-write.md) |
-| Reads between the runner's own processes, the Worker's diagnostic sockets | [runner reads](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/runner-reads.md) |
-| What `sandbox check` proves | [probes](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/probes.md) |
-| CI's run-time controls, where each probe has been seen to fail, timings, RHEL 10 | [evidence](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/evidence.md) |
+| The contract, the caveats of running every step as the runner's user, the sandbox user | [README](https://github.com/ckyrouac/actions/blob/main/secure-host/README.md) |
+| What a later step can count on, one trust level for the rest of the job, R4, R10 and R11 | [threat model](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/threat-model.md) |
+| The image, supported hosts, what setup does to the host, the lock, what a job has to know, containers, running it without the action | [setup](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/setup.md) |
+| The egress write policy, the proxy's policy file and domain allowlist, the network rules | [egress](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/egress.md) |
+| The access-time world-write policy, its loader, and what went with the walk | [world-write](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/world-write.md) |
+| Reads between the runner's own processes, the Worker's diagnostic sockets | [runner reads](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/runner-reads.md) |
+| What `sandbox check` proves | [probes](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/probes.md) |
+| CI's run-time controls, where each probe has been seen to fail, timings, RHEL 10 | [evidence](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/evidence.md) |

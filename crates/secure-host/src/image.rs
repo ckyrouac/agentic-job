@@ -18,7 +18,7 @@
 //!
 //! The image holds no agent code: in an agent job, agentic-job's own
 //! root step ran before it (`[host.prepared]`, [`crate::config::Prepared`]).
-//! For one release, until cgwalters-forge/actions pins an image built
+//! For one release, until ckyrouac/actions pins an image built
 //! so, the binary also answers to its old name, in the image
 //! ([`IMAGE_ALIAS`]) and on the host ([`HOST_ALIAS`]), for what that
 //! action calls by it: `config --host` and `sandbox check`.

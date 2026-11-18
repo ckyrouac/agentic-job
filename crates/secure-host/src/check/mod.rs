@@ -12,7 +12,7 @@
 //! those are agentic-job's own (`run::probe`), made once the token is in
 //! place. They read the host's tables of any [`HostFile`]; agentic-job's
 //! `sandbox::check` maps the result to its exit states.
-//! cgwalters-forge/actions's secure-host/docs/probes.md lists them all.
+//! ckyrouac/actions's secure-host/docs/probes.md lists them all.
 //!
 //! The probes are methods of `Checker` in the modules under this one:
 //! `on_host`, `runner` (the runner's own user, which setup

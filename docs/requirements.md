@@ -66,7 +66,7 @@ the inherited environment at the runner's UID. `ACTIONS_*` configuration
 variables are refused, but clearing them does not protect earlier same-UID
 processes, memory or files. Host probes are not proof of supervisor isolation;
 they do not cover every service behind the system bus or all UDP listeners.
-See the action's [probes](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/probes.md#local-sockets).
+See the action's [probes](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/probes.md#local-sockets).
 
 ### R3. No reachable credentials is a goal, not the current guarantee
 
@@ -92,7 +92,7 @@ without proof; `token-file` has no request accounting or revocation by `run`.
 ### R4. The runner's user loses root before the agent runs
 
 secure-host's lock meets this for every later step, the agent included
-([R4 there](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/threat-model.md#r4-the-runners-user-loses-root-before-untrusted-steps-run)).
+([R4 there](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/threat-model.md#r4-the-runners-user-loses-root-before-untrusted-steps-run)).
 The agent doesn't need root. Runner mode uses no helper user switch or UID-wide
 reaping; the remaining host helper has fixed operations, not generic root execution
 ([the helper](sandbox-check.md#the-helper)).
@@ -145,7 +145,7 @@ action require separate review.
 ### R10. What the guarantees depend on
 
 The host's dependencies are secure-host's
-([R10 there](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/threat-model.md#r10-what-the-guarantees-depend-on)).
+([R10 there](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/threat-model.md#r10-what-the-guarantees-depend-on)).
 Trust and protect the caller ref containing bounds and setup configuration.
 Give each job minimal permissions; notification and apply jobs inherit
 the caller's grant. Limit an apply environment to trusted refs. Targets
@@ -155,7 +155,7 @@ override the launch refusal ([private repositories](private-repositories.md)).
 
 ### R11. Lints are not boundaries
 
-As for any job ([R11 there](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/threat-model.md#r11-lints-are-not-boundaries)). For the
+As for any job ([R11 there](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/threat-model.md#r11-lints-are-not-boundaries)). For the
 agent, sandbox entry drops the job environment regardless of a caller's
 secrets, shell or environment. This is not isolation from same-UID state.
 

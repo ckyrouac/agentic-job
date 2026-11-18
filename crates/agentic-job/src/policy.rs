@@ -1979,7 +1979,7 @@ max_patch_files = 10
             ("topic/nested/branch", "add_comment", true),
             ("bot/../main", "add_comment", false),
             ("bot/w2-37863744105", "create_pull_request", false),
-            ("topic/nested/branch", "add_comment,update_issue", true),
+            ("topic/nested/branch", "update_issue", false),
             ("main", MARK_READY, false),
         ] {
             let result = bounds.compile(&Request {

@@ -458,6 +458,100 @@ fn a_request_within_the_bounds_prints_its_policy() {
 }
 
 #[test]
+fn shipped_repository_bounds_admit_the_fork_without_changing_limits() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let allow = root.join(".github/agentic-job/allow.toml");
+    for (repo, code) in [
+        ("ckyrouac/agentic-job", 0),
+        ("cgwalters-forge/agentic-job", 1),
+    ] {
+        let url = format!("https://github.com/{repo}");
+        let output = policy(
+            &allow,
+            &[
+                ("--repo", repo),
+                ("--clone-url", &url),
+                ("--max-outputs", "5"),
+            ],
+        );
+        assert_eq!(
+            output.status.code(),
+            Some(code),
+            "{repo}: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        if code == 0 {
+            let compiled: Value = serde_json::from_slice(&output.stdout).unwrap();
+            assert_eq!(compiled["max_outputs"], 5);
+            assert_eq!(compiled["max_patch_bytes"], 1_048_576);
+            assert_eq!(
+                compiled["safe_outputs"]["create_pull_request"]["max_patch_files"],
+                50
+            );
+            assert_eq!(compiled["safe_outputs"]["create_pull_request"]["max"], 1);
+            assert_eq!(compiled["safe_outputs"]["noop"]["max"], 1);
+        } else {
+            assert!(output.stdout.is_empty(), "{repo}");
+        }
+    }
+}
+
+#[test]
+fn analysis_bounds_admit_only_the_fork_and_refuse_issue_updates() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let allow = root.join("workflow/analysis.toml");
+    for (repo, code) in [
+        ("ckyrouac/agentic-job", 0),
+        ("cgwalters-forge/agentic-job", 1),
+    ] {
+        let url = format!("https://github.com/{repo}");
+        let output = policy(
+            &allow,
+            &[
+                ("--repo", repo),
+                ("--clone-url", &url),
+                ("--base", "topic"),
+                ("--kind", "analysis"),
+                ("--outputs", "add_comment"),
+                ("--max-outputs", "1"),
+            ],
+        );
+        assert_eq!(
+            output.status.code(),
+            Some(code),
+            "{repo}: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        if code == 0 {
+            let compiled: Value = serde_json::from_slice(&output.stdout).unwrap();
+            assert_eq!(compiled["repo"], repo);
+            assert_eq!(compiled["base"], "topic");
+            assert_eq!(compiled["max_outputs"], 1);
+            assert_eq!(compiled["max_patch_bytes"], 1_048_576);
+            assert_eq!(compiled["safe_outputs"]["add_comment"]["max"], 1);
+            assert!(compiled["safe_outputs"].get("update_issue").is_none());
+        } else {
+            assert!(output.stdout.is_empty(), "{repo}");
+        }
+    }
+
+    let output = policy(
+        &allow,
+        &[
+            ("--repo", "ckyrouac/agentic-job"),
+            ("--clone-url", "https://github.com/ckyrouac/agentic-job"),
+            ("--base", "topic"),
+            ("--kind", "analysis"),
+            ("--outputs", "update_issue"),
+            ("--max-outputs", "1"),
+        ],
+    );
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stdout.is_empty());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("update_issue"));
+}
+
+#[test]
 fn documented_proposals_request_fits_shipped_and_small_bounds() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     let docs = std::fs::read_to_string(root.join("docs/workflow.md")).unwrap();
@@ -490,11 +584,8 @@ fn documented_proposals_request_fits_shipped_and_small_bounds() {
         let output = policy(
             &allow,
             &[
-                ("--repo", "cgwalters-forge/agentic-job"),
-                (
-                    "--clone-url",
-                    "https://github.com/cgwalters-forge/agentic-job",
-                ),
+                ("--repo", "ckyrouac/agentic-job"),
+                ("--clone-url", "https://github.com/ckyrouac/agentic-job"),
                 ("--outputs", input("outputs")),
                 ("--max-outputs", input("max-outputs")),
             ],
@@ -567,7 +658,7 @@ fn try_it_caller_fits_its_bounds_and_configuration() {
     }
     assert_eq!(
         caller_yaml["jobs"]["run"]["uses"].as_str().unwrap(),
-        "cgwalters-forge/agentic-job/.github/workflows/agentic-job.yml@COMMIT"
+        "ckyrouac/agentic-job/.github/workflows/agentic-job.yml@COMMIT"
     );
     let default = |name: &str| {
         workflow
@@ -1103,24 +1194,19 @@ fn dispatch_profiles_use_the_example_bounds() {
         (
             "branch",
             "create_pull_request,add_comment,noop,missing_tool,missing_data",
-            "cgwalters-forge/agentic-job",
+            "ckyrouac/agentic-job",
             0,
         ),
         (
             "analysis",
             "add_comment,noop,missing_tool,missing_data",
-            "cgwalters-forge/agentic-job",
+            "ckyrouac/agentic-job",
             0,
         ),
         ("analysis", "add_comment", "other/repo", 1),
         ("analysis", "close_issue", "other/repo", 1),
-        ("branch", "create_issue", "cgwalters-forge/agentic-job", 1),
-        (
-            "analysis",
-            "create_pull_request",
-            "cgwalters-forge/agentic-job",
-            1,
-        ),
+        ("branch", "create_issue", "ckyrouac/agentic-job", 1),
+        ("analysis", "create_pull_request", "ckyrouac/agentic-job", 1),
     ] {
         let url = format!("https://github.com/{repo}");
         let output = policy(
@@ -1160,7 +1246,7 @@ fn dispatch_profiles_use_the_example_bounds() {
 fn dispatch_triage_closes_issues_only_in_its_repository() {
     let allow =
         Path::new(env!("CARGO_MANIFEST_DIR")).join("../../.github/agentic-job/dispatch.toml");
-    let repo = "cgwalters-forge/agentic-job";
+    let repo = "ckyrouac/agentic-job";
     let output = policy(
         &allow,
         &[
@@ -1241,7 +1327,7 @@ fn dispatch_documented_unprotected_files_hint_is_valid() {
         .replace("# [unprotected_files]", "[unprotected_files]")
         .replace(
             "# repos = [\"OWNER/REPO\"]",
-            "repos = [\"cgwalters-forge/agentic-job\"]",
+            "repos = [\"ckyrouac/agentic-job\"]",
         )
         .replace("# files =", "files =");
     let dir = tempfile::tempdir().unwrap();
@@ -1250,11 +1336,8 @@ fn dispatch_documented_unprotected_files_hint_is_valid() {
     let output = policy(
         &allow,
         &[
-            ("--repo", "cgwalters-forge/agentic-job"),
-            (
-                "--clone-url",
-                "https://github.com/cgwalters-forge/agentic-job",
-            ),
+            ("--repo", "ckyrouac/agentic-job"),
+            ("--clone-url", "https://github.com/ckyrouac/agentic-job"),
         ],
     );
     assert!(
@@ -1280,11 +1363,8 @@ fn review_caller_bounds_allow_only_analysis_outputs() {
                 .arg("policy")
                 .arg("--allow")
                 .arg(&allow)
-                .args(["--repo", "cgwalters-forge/agentic-job"])
-                .args([
-                    "--clone-url",
-                    "https://github.com/cgwalters-forge/agentic-job",
-                ])
+                .args(["--repo", "ckyrouac/agentic-job"])
+                .args(["--clone-url", "https://github.com/ckyrouac/agentic-job"])
                 .args(["--base", "main", "--kind", kind, "--outputs", outputs])
                 .args(["--max-outputs", max])
                 .output()

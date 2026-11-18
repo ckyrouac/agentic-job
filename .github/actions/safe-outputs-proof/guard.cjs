@@ -3,14 +3,14 @@ const { execFileSync } = require('node:child_process');
 const { appendFileSync } = require('node:fs');
 
 const BODY = 'Standalone safe-outputs deterministic CLI proof.';
-const COMMENT_URL = 'https://github.com/cgwalters-forge/agentic-job/issues/64#issuecomment-';
+const COMMENT_URL = 'https://github.com/ckyrouac/agentic-job/issues/2#issuecomment-';
 const LIMIT = 100;
 
 function inspect(read, attempt, verify = false) {
   // One page, byte cap and timeout; a full page is not evidence of absence.
   const comments = JSON.parse(read());
   if (!Array.isArray(comments) || comments.length >= LIMIT) {
-    throw new Error('Incomplete proof lookup; inspect issue 64 before continuing.');
+    throw new Error('Incomplete proof lookup; inspect issue #2 before continuing.');
   }
   const matches = [];
   for (const comment of comments) {
@@ -22,14 +22,14 @@ function inspect(read, attempt, verify = false) {
         comment.user?.type !== 'Bot' || comment.performed_via_github_app?.id !== 15368 ||
         !Number.isSafeInteger(comment.id) || comment.id <= 0 ||
         comment.html_url !== `${COMMENT_URL}${comment.id}`) {
-      throw new Error('Ambiguous proof comment; inspect issue 64 before continuing.');
+      throw new Error('Ambiguous proof comment; inspect issue #2 before continuing.');
     }
     matches.push(comment.html_url);
   }
-  if (matches.length > 1) throw new Error('Multiple proof comments; inspect issue 64.');
+  if (matches.length > 1) throw new Error('Multiple proof comments; inspect issue #2.');
   if (matches.length === 1) return { publish: false, url: matches[0] };
   if (verify || attempt !== '1') {
-    throw new Error('No proof found; inspect previous apply logs and issue 64, do not blindly retry.');
+    throw new Error('No proof found; inspect previous apply logs and issue #2, do not blindly retry.');
   }
   return { publish: true };
 }
@@ -37,7 +37,7 @@ function inspect(read, attempt, verify = false) {
 function readComments() {
   return execFileSync('gh', [
     'api', '--hostname', 'github.com',
-    'repos/cgwalters-forge/agentic-job/issues/64/comments?per_page=100&page=1',
+    'repos/ckyrouac/agentic-job/issues/2/comments?per_page=100&page=1',
   ], { encoding: 'utf8', timeout: 30_000, maxBuffer: 8 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] });
 }
 
@@ -52,7 +52,7 @@ if (require.main === module) {
     }
   } catch {
     // Do not echo API bodies, which are untrusted, or subprocess environment.
-    console.error('Proof lookup refused. Inspect issue 64 and the previous apply logs; no automatic publication retry.');
+    console.error('Proof lookup refused. Inspect issue #2 and the previous apply logs; no automatic publication retry.');
     process.exitCode = 1;
   }
 }

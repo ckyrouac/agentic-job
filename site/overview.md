@@ -26,7 +26,7 @@ and agents are just one type of workload.
 The [`secure-host` action](../docs/secure-host.md) locks down a fresh
 supported GitHub Actions runner so that later steps cannot regain `sudo`.
 It is built from this workspace and also published through
-`cgwalters-forge/actions/secure-host`. Losing root does not protect
+`ckyrouac/actions/secure-host`. Losing root does not protect
 credentials from another process running as the same user; see the
 [credential boundary](../docs/inference.md).
 

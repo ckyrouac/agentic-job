@@ -2,7 +2,7 @@
 # from a branch of its own that is the run's base, and the run's item.
 # No patch.
 hosts = ["github.com"]
-repos = ["cgwalters-forge/agentic-job"]
+repos = ["ckyrouac/agentic-job"]
 bases = ["e2e-threads/*"]
 max_outputs = 3
 max_patch_bytes = 1048576

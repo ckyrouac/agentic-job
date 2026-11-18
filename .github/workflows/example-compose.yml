@@ -75,7 +75,7 @@ jobs:
   # Another repository names each piece by the commit it has read, the
   # same for all three, which also pins the binary and the agent job's
   # actions (the policy call's source-repository and source-sha):
-  #   uses: cgwalters-forge/agentic-job/.github/workflows/NAME.yml@COMMIT
+  #   uses: ckyrouac/agentic-job/.github/workflows/NAME.yml@COMMIT
   policy:
     needs: task
     uses: ./.github/workflows/policy.yml # zizmor: ignore[self-repository] Call the reusable workflow from this revision.
@@ -179,7 +179,7 @@ jobs:
       # `setup.script`, which the step after secure-host runs.
       - name: The host's configuration
         run: agentic-job config --host --no-script --from .agentic-job/config.toml > "$RUNNER_TEMP/agentic-job-host.toml"
-      # cgwalters-forge/actions/secure-host, through the forwarder of the
+      # ckyrouac/actions/secure-host, through the forwarder of the
       # policy job's commit, which pins it: the last step with root.
       - uses: ./.agentic-job-source/secure-host # zizmor: ignore[self-repository] Execute the policy-selected source checkout, not the caller repository.
         with:

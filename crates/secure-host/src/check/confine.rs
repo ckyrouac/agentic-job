@@ -13,7 +13,7 @@
 //! secure-host as the positive control, where each must work, and after it
 //! from a `run:` step and from .github/actions/confine-probe, a JavaScript
 //! action whose main and post steps run it as their child, where each must
-//! fail (cgwalters-forge/actions's secure-host/docs/evidence.md). Its
+//! fail (ckyrouac/actions's secure-host/docs/evidence.md). Its
 //! `no-user` mode probes, after the lock, that setup made no second user
 //! (agentic-job#2989) and left the runner's sudo the helper's rule alone.
 //!

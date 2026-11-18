@@ -7,7 +7,7 @@
 # github.com.
 hosts = ["github.com"]
 # Globs, ignoring case: `*` is anything but a slash, `**` anything.
-repos = ["cgwalters-forge/agentic-job"]
+repos = ["ckyrouac/agentic-job"]
 bases = ["main"]
 
 # The most outputs a run may hand back in all, and how large a change.

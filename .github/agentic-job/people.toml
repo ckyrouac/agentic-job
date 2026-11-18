@@ -2,7 +2,7 @@
 # user: only the one account that may be both, so a run cannot notify
 # anyone else (docs/safe-outputs.md).
 hosts = ["github.com"]
-repos = ["cgwalters-forge/agentic-job"]
+repos = ["ckyrouac/agentic-job"]
 # Read-only analysis of the run-owned fixture, with no patch/contents output.
 bases = ["e2e-scratch/*"]
 max_outputs = 2

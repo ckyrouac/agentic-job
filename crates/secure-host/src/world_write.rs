@@ -7,7 +7,7 @@
 //! checksum with the binary, or compiled with a build of the same source:
 //! no compiler here. The threat is any user but the owner changing a
 //! world-writable file or non-sticky directory on the root filesystem
-//! (cgwalters-forge/actions's secure-host/docs/world-write.md). Every
+//! (ckyrouac/actions's secure-host/docs/world-write.md). Every
 //! refusal leaves the step failed; nothing
 //! falls back to running without the policy.
 //!

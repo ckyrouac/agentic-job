@@ -29,7 +29,7 @@ stop-services = [
 ]
 # systemd-resolved, which the whole runner resolves names with, resolves
 # them for any user, around the egress proxy: setup leaves it to root and
-# the runner's user (cgwalters-forge/actions's secure-host/docs/egress.md).
+# the runner's user (ckyrouac/actions's secure-host/docs/egress.md).
 close-resolved = true
 
 [host.check]
@@ -65,7 +65,7 @@ packages = ["nftables", "podman", "uidmap"]
 #   static.crates.io  the crates, checked against Cargo.lock
 #   github.com        git dependencies (git fetch is already allowed)
 # Their build scripts and proc macros run as the sandbox user.
-"cgwalters-forge/agentic-job" = ["cargo", "rustfmt", "rust-clippy"]
+"ckyrouac/agentic-job" = ["cargo", "rustfmt", "rust-clippy"]
 
 [commit]
 # Permit cleanup of already-public fixtures, not new keys or cross-file copies.

@@ -756,7 +756,7 @@ jobs:
     if: >-
       github.event_name == 'pull_request_target' ||
       (github.event.issue.pull_request && startsWith(github.event.comment.body, '/review'))
-    uses: cgwalters-forge/agentic-job/.github/workflows/review.yml@COMMIT
+    uses: ckyrouac/agentic-job/.github/workflows/review.yml@COMMIT
     permissions:
       contents: read
       issues: read

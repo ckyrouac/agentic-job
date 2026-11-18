@@ -56,7 +56,7 @@ jobs:
         with:
           persist-credentials: false
       # Another repository names the action by the commit it has read:
-      #   uses: cgwalters-forge/actions/secure-host@COMMIT
+      #   uses: ckyrouac/actions/secure-host@COMMIT
       - name: Secure the host
         uses: ./secure-host # zizmor: ignore[self-repository] Exercise the checked-out forwarder under test.
       - name: Leave one line unformatted (CI)
@@ -95,7 +95,7 @@ jobs:
   # environment holding SAFE_OUTPUTS_PAT, as policy refuses
   # create_pull_request without one. Another repository names it by the
   # commit it has read:
-  #   uses: cgwalters-forge/agentic-job/.github/workflows/agentic-job.yml@COMMIT
+  #   uses: ckyrouac/agentic-job/.github/workflows/agentic-job.yml@COMMIT
   apply:
     needs: fmt
     uses: ./.github/workflows/agentic-job.yml # zizmor: ignore[self-repository] Call the reusable workflow from this revision.

@@ -1,6 +1,6 @@
 {
-  "repo": "cgwalters-forge/agentic-job",
-  "item": 64,
+  "repo": "ckyrouac/agentic-job",
+  "item": 2,
   "max_outputs": 1,
   "outputs": {
     "add_comment": { "max": 1 }

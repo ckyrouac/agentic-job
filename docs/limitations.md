@@ -19,7 +19,7 @@ configuration, provenance and the pending readiness integration. Local fake-agen
 tests do not prove Kubernetes Pod Security or a live GitLab inference deployment.
 
 - Steps after `secure-host` lose root but keep the job's tokens and an open
-  network ([one trust level for the rest of the job](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/threat-model.md#one-trust-level-for-the-rest-of-the-job)).
+  network ([one trust level for the rest of the job](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/threat-model.md#one-trust-level-for-the-rest-of-the-job)).
   The reusable workflow's agent job has no `id-token`: a separate register job
   registers the run ([the run token](workflow.md#the-run-token)).
 - The egress proxy lets any host be read unless its policy file sets
@@ -33,9 +33,9 @@ tests do not prove Kubernetes Pod Security or a live GitLab inference deployment
   systemd-resolved's Varlink socket to every user but root. Every later
   step and the agent run as the runner's user, which still resolves names,
   so data can leave through DNS
-  ([not claimed](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/threat-model.md#not-claimed)).
+  ([not claimed](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/threat-model.md#not-claimed)).
 - The world-write policy is proven at run time on hosted Ubuntu 26.04,
-  not on RHEL 10 ([host evidence](https://github.com/cgwalters-forge/actions/blob/main/secure-host/docs/evidence.md)).
+  not on RHEL 10 ([host evidence](https://github.com/ckyrouac/actions/blob/main/secure-host/docs/evidence.md)).
 - The reusable workflow doesn't accept a model key or an MCP credential, so
   a real agent needs a broker ([refused for now](inference.md#a-provider-api-key)).
   Where an agent job of your own uses a key, nothing outside the provider

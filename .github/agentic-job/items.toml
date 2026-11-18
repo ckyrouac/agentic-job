@@ -2,7 +2,7 @@
 # e2e-items-scratch opens, from a branch of its own that is the run's base.
 # No patch.
 hosts = ["github.com"]
-repos = ["cgwalters-forge/agentic-job"]
+repos = ["ckyrouac/agentic-job"]
 bases = ["e2e-items/*"]
 max_outputs = 3
 max_patch_bytes = 1048576

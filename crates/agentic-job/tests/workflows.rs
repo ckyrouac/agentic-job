@@ -676,12 +676,12 @@ fn standalone_proof_event_gates_and_duplicate_refusals() {
             .unwrap();
         // Exercise the actual Actions boolean expression, not a copied gate.
         let script = format!(
-            r#"for (const repository of ['cgwalters-forge/agentic-job', 'fork/agentic-job'])
+            r#"for (const repository of ['ckyrouac/agentic-job', 'cgwalters-forge/agentic-job', 'fork/agentic-job'])
             for (const ref of ['refs/heads/main', 'refs/heads/topic', 'refs/pull/1/merge'])
             for (const event_name of ['push', 'workflow_dispatch', 'pull_request', 'pull_request_target', 'schedule', 'workflow_run'])
             for (const publish of [true, false, undefined]) {{
                 const github = {{repository, ref, event_name}}, inputs = {{publish}};
-                const expected = repository === 'cgwalters-forge/agentic-job' && ref === 'refs/heads/main' &&
+                const expected = repository === 'ckyrouac/agentic-job' && ref === 'refs/heads/main' &&
                     (event_name === 'push' || (event_name === 'workflow_dispatch' && publish === true));
                 require('node:assert/strict').equal(Boolean({expression}), expected, JSON.stringify({{github, inputs}}));
             }}"#
@@ -728,6 +728,18 @@ fn standalone_proof_event_gates_and_duplicate_refusals() {
             .ends_with("guard.cjs\" verify")
     );
     let guard_source = workflow(".github/actions/safe-outputs-proof/guard.cjs");
+    let context: serde_json::Value = serde_json::from_str(&workflow(
+        ".github/agentic-job/e2e/safe-outputs-context.json",
+    ))
+    .unwrap();
+    assert_eq!(context["repo"].as_str(), Some("ckyrouac/agentic-job"));
+    assert_eq!(context["item"].as_u64(), Some(2));
+    assert_eq!(context["max_outputs"].as_u64(), Some(1));
+    assert_eq!(context["outputs"]["add_comment"]["max"].as_u64(), Some(1));
+    let guard_test = workflow(".github/actions/safe-outputs-proof/guard.test.cjs");
+    assert!(
+        guard_test.contains("https://github.com/ckyrouac/agentic-job/issues/2#issuecomment-123")
+    );
     assert!(workflow("safe-outputs-cli.yml").contains(&format!(
         "body:\"{}\"",
         "Standalone safe-outputs deterministic CLI proof."
@@ -3375,7 +3387,7 @@ fn caller_network_credentials_are_spent_before_the_agent() {
             < agent.find(&format!("uses: {network}")).unwrap()
     );
     let forbidden = Regex::new(r"(?i)tailscale|join(?:s|ing)? (?:a|the) tailnet").unwrap();
-    let foreign = Regex::new(r"cgwalters-forge/actions(?:/([\w/-]+))?").unwrap();
+    let foreign = Regex::new(r"ckyrouac/actions(?:/([\w/-]+))?").unwrap();
     let files = std::fs::read_dir(root().join(".github/workflows"))
         .unwrap()
         .map(|e| e.unwrap().path())
@@ -3751,6 +3763,45 @@ fn ci_agents_take_the_build_image_by_id_only() {
 }
 
 #[test]
+fn analysis_e2e_uses_its_dedicated_issue_not_the_safe_outputs_proof_issue() {
+    let ci = definition("ci.yml");
+    assert_eq!(
+        ci["jobs"]["e2e-analysis"]["with"]["outputs"].as_str(),
+        Some("add_comment")
+    );
+    assert_eq!(
+        ci["jobs"]["e2e-analysis"]["with"]["max-outputs"].as_str(),
+        Some("1")
+    );
+    for job in ["e2e-analysis", "e2e-analysis-refused"] {
+        assert_eq!(
+            ci["jobs"][job]["with"]["comment-target"].as_str(),
+            Some("3"),
+            "{job}"
+        );
+    }
+
+    let analysis = workflow(".github/agentic-job/e2e/analysis.sh");
+    assert!(!analysis.contains(r#"\"type\": \"update_issue\""#));
+    assert!(!analysis.contains(r#"\"issue_number\": 2"#));
+    assert!(!analysis.contains(r#"\"issue_number\": 64"#));
+
+    let verify = &ci["jobs"]["e2e-verify"]["env"];
+    assert_eq!(verify["ANALYSIS_ISSUE"].as_str(), Some("3"));
+    let ci_text = workflow(".github/workflows/ci.yml");
+    assert!(ci_text.contains("issues/$ANALYSIS_ISSUE/comments"));
+    assert!(ci_text.contains("The topic-branch analysis had no issue-body update handler"));
+    assert!(ci_text.contains(r#"for issue in "$ISSUE" "$ANALYSIS_ISSUE""#));
+
+    let proof_context: serde_json::Value = serde_json::from_str(&workflow(
+        ".github/agentic-job/e2e/safe-outputs-context.json",
+    ))
+    .unwrap();
+    assert_eq!(proof_context["repo"].as_str(), Some("ckyrouac/agentic-job"));
+    assert_eq!(proof_context["item"].as_u64(), Some(2));
+}
+
+#[test]
 fn composed_example_keeps_the_callers_privilege_boundary() {
     // Shape only: the fresh-host e2e-compose job executes these sudo probes.
     let doc = definition("example-compose.yml");
@@ -3989,7 +4040,7 @@ fn deterministic_example_passes_when_pinned() {
 /// else a noop.
 #[test]
 fn deterministic_example_hands_back_what_check_accepts() {
-    const REPO: &str = "cgwalters-forge/agentic-job";
+    const REPO: &str = "ckyrouac/agentic-job";
     const BRANCH: &str = "agent-run-7";
     let git = |dir: &Path, args: &[&str]| {
         let status = Command::new("git")
@@ -5066,7 +5117,7 @@ const SHAPES: &[(&str, &str, &[&str], &[&str])] = &[
             r"- if: \$\{\{ !cancelled\(\) \}\}\n        uses: actions/upload-artifact@",
         ],
         &[
-            "uses: cgwalters-forge/agentic-job",
+            "uses: ckyrouac/agentic-job",
             "config:|--boolean|deny-runner|unlink-worker|lock-runner",
             r"binary\.sh|secure-host world-write|sandbox setup|podman run|continue-on-error|\|\| true",
             "actions/github-script@",
@@ -5177,7 +5228,7 @@ const SHAPES: &[(&str, &str, &[&str], &[&str])] = &[
     (
         "ci.yml",
         "secure-host-published",
-        &["uses: cgwalters-forge/agentic-job/secure-host@main "],
+        &["uses: ckyrouac/agentic-job/secure-host@main "],
         &[r"\n {8}with:|steps\.host\.outputs"],
     ),
     // The required ingress check reports on every pull request (a paths
@@ -5245,7 +5296,7 @@ const SHAPES: &[(&str, &str, &[&str], &[&str])] = &[
         ".github/agentic-job/dispatch.toml",
         "",
         &[
-            r#"(?m)^repos = \["cgwalters-forge/agentic-job"\]$"#,
+            r#"(?m)^repos = \["ckyrouac/agentic-job"\]$"#,
             r"(?m)^max_outputs = 32$",
             r"(?m)^create_pull_request = \{ max = 1 \}$",
             r"(?m)^add_comment = \{ max = 1 \}$",
@@ -7374,7 +7425,7 @@ fn published_path_requires_the_effective_deployments_executables_and_compatibili
     assert_eq!(
         selected,
         format!(
-            "cgwalters-forge/actions/secure-host@{}",
+            "ckyrouac/actions/secure-host@{}",
             step["env"]["ACTION"].as_str().unwrap()
         )
     );
@@ -7492,7 +7543,7 @@ fn the_public_secure_host_forwards_to_the_pinned_action_and_refuses_old_inputs()
         .filter_map(|step| step["uses"].as_str())
         .collect();
     assert_eq!(uses.len(), 1, "{uses:?}");
-    let pin = Regex::new(r"(?m)^ {4,6}- uses: cgwalters-forge/actions/secure-host@[0-9a-f]{40} # main, with secure-host:v(\d+)\.(\d+)\.(\d+)$").unwrap();
+    let pin = Regex::new(r"(?m)^ {4,6}- uses: ckyrouac/actions/secure-host@[0-9a-f]{40} # main, with secure-host:v(\d+)\.(\d+)\.(\d+)$").unwrap();
     let found = pin.captures(&text).unwrap_or_else(|| panic!("{}", uses[0]));
     let line = found.get(0).unwrap().as_str();
     let site = workflow("site.yml");
@@ -7666,7 +7717,7 @@ fn the_public_secure_host_forwards_to_the_pinned_action_and_refuses_old_inputs()
         let result = refuse(&[name]);
         assert_eq!(result.status.code(), Some(1), "{name}: {result:?}");
         let refusal = Regex::new(&format!(
-            r"^::error::.*cgwalters-forge/actions/secure-host.* not {}: ",
+            r"^::error::.*ckyrouac/actions/secure-host.* not {}: ",
             regex::escape(name)
         ))
         .unwrap();

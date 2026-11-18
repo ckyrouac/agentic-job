@@ -47,8 +47,8 @@ agentic-job workflow's TOML bounds file. For example:
 
 ```json
 {
-  "repo": "cgwalters-forge/agentic-job",
-  "item": 64,
+  "repo": "example-org/example",
+  "item": 7,
   "max_outputs": 1,
   "outputs": { "add_comment": { "max": 1 } }
 }
@@ -63,7 +63,7 @@ Check does not validate that URL. It is a credential destination:
 never accept it from the producer. Unknown context keys refuse.
 
 The input is unchanged gh-aw JSONL, for example
-`{"type":"add_comment","repo":"cgwalters-forge/agentic-job","item_number":64,"body":"Deterministic proof."}`.
+`{"type":"add_comment","repo":"example-org/example","item_number":7,"body":"Deterministic proof."}`.
 Check reads no-follow regular files, caps input at 1 MiB/1000 lines and context at
 64 KiB, runs the existing collector and policy checks, and creates a new receipt
 only on success. It will not overwrite a receipt. It does no network I/O and
@@ -379,7 +379,7 @@ does not provision runners, produce agent output or prove live GitLab CI job
 isolation; the disposable local GitLab test covers publication, not deployment.
 
 The [CLI proof workflow](../.github/workflows/safe-outputs-cli.yml) uses
-the existing e2e destination, issue 64 in `cgwalters-forge/agentic-job`, and
+the dedicated proof destination, issue 2 in `ckyrouac/agentic-job`, and
 runs apply in the existing `agent-apply` environment. A push to this repository's
 `main` that changes the workflow file, or a dispatch on `main` with
 `publish: true`, constructs a fixed non-agent comment, checks it after
@@ -400,25 +400,22 @@ cannot run either job; manual publication remains off by default.
 The concrete duplicate threat is competing attempts, including a rerun after a
 lost POST response. All attempts share a fixed, non-cancelling concurrency group.
 Immediately before apply, a read-only guard inspects at most 100 comments on
-issue 64 (30 seconds, 8 MiB). A full page, failed/malformed lookup, multiple
+issue 2 (30 seconds, 8 MiB). A full page, failed/malformed lookup, multiple
 matches or a matching phrase without the exact body and GitHub Actions bot/App
 identity fails closed. An existing exact comment is linked and reused, never
 posted again. Absence permits publication only on a run's first attempt; a rerun
-without a comment refuses and requires inspection of issue 64 and prior apply
+without a comment refuses and requires inspection of issue 2 and prior apply
 logs. This is not a general CLI idempotency feature. No automatic POST retry is
 added. Successful apply reads the comment back and links it in the summary;
 an ambiguous POST failure stops before that step. Do not dispatch again to work
 around a refusal without inspecting the actual outcome.
 
 Live proof still requires the merged workflow on `main`, environment approval
-if configured, and an accessible issue 64. As of the latest pre-change inspection,
-the workflow has no runs and issue 64 has no standalone proof comment. Merge is
-only the trigger, not completion: observe the actual `check` and `apply` jobs and
-logs, verify the resulting comment, then link both the successful non-agent run
-and comment back to #2397 through safe outputs. If publication fails, inspect the
-failing step and reproduce/fix it without weakening these boundaries. Keep #2397
-open while waiting for merge/run or investigating failure; offline tests and PR
-CI are not credentialed publication evidence.
+if configured, and an accessible issue 2. Merge is only the trigger, not
+completion: observe the actual `check` and `apply` jobs and logs, then verify
+the resulting comment. If publication fails, inspect the failing step and
+reproduce/fix it without weakening these boundaries; offline tests and PR CI
+are not credentialed publication evidence.
 
 ## Stacked proposals: library groundwork only
 
